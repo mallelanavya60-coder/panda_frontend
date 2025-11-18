@@ -8,25 +8,16 @@ interface Props {
   onChange: (semesterId: number) => void;
 }
 
-export const SemesterSelector: React.FC<Props> = ({ semesters, selectedSemesterId, onChange }) => {
+const SemesterSelector: React.FC<Props> = ({ semesters, selectedSemesterId, onChange }) => {
   return (
-    <div style={{ marginBottom: "1rem" }}>
-      <label htmlFor="semester-select" style={{ marginRight: "0.5rem" }}>
-        Select Semester:
-      </label>
-      <select
-        id="semester-select"
-        value={selectedSemesterId}
-        onChange={(e) => onChange(Number(e.target.value))}
-        style={{ padding: "0.25rem 0.5rem" }}
-      >
-        {semesters.map((sem) => (
-          <option key={sem.id} value={sem.id}>
-            {sem.name} ({sem.year})
-          </option>
-        ))}
+    <div style={{ marginBottom: 12 }}>
+      <label htmlFor="semester-select" style={{ marginRight: 8 }}>Select Semester:</label>
+      <select id="semester-select" value={selectedSemesterId} onChange={(e) => onChange(Number(e.target.value))}>
+        <option value={0}>-- Select --</option>
+        {semesters.map(s => <option key={s.id} value={s.id}>{s.name} ({s.year})</option>)}
       </select>
     </div>
   );
 };
- export default SemesterSelector;
+
+export default SemesterSelector;

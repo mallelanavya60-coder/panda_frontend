@@ -1,29 +1,23 @@
+// src/components/ScheduleCard.tsx
 import React from "react";
-import { SectionDto } from "./SectionCard";
+import { StudentScheduleItem } from "../types/models";
 
 interface Props {
-  section: SectionDto;
+  item: StudentScheduleItem;
   onRemove?: (sectionId: number) => void;
 }
 
-const ScheduleCard: React.FC<Props> = ({ section, onRemove }) => {
+const ScheduleCard: React.FC<Props> = ({ item, onRemove }) => {
   return (
-    <div className="border rounded p-3 mb-3 shadow-sm bg-white">
-      <div className="flex justify-between">
+    <div style={{ border: "1px solid #e6edf3", padding: 10, borderRadius: 8, marginBottom: 10, background: "#fff" }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div>
-          <div className="font-semibold">{section.course_code} — {section.course_name}</div>
-          <div className="text-sm text-gray-600">{section.teacher_name || "TBD"}</div>
-          <div className="text-sm text-gray-600">{section.schedule_str || "TBD"}</div>
+          <div style={{ fontWeight: 700 }}>{item.courseCode} — {item.courseName}</div>
+          <div style={{ color: "#555" }}>{item.day ?? ""} {item.startTime ?? ""} - {item.endTime ?? ""}</div>
+          <div style={{ color: "#666", fontSize: 13 }}>{item.roomName ?? ""} • {item.teacherName ?? ""}</div>
         </div>
         <div>
-          {onRemove && (
-            <button
-              onClick={() => onRemove(section.section_id)}
-              className="px-3 py-1 rounded text-sm bg-red-600 text-white"
-            >
-              Remove
-            </button>
-          )}
+          {onRemove && <button onClick={() => onRemove(item.sectionId)} style={{ background: "#ef4444", color: "#fff", border: "none", padding: "6px 10px", borderRadius: 6 }}>Remove</button>}
         </div>
       </div>
     </div>
@@ -31,4 +25,3 @@ const ScheduleCard: React.FC<Props> = ({ section, onRemove }) => {
 };
 
 export default ScheduleCard;
-

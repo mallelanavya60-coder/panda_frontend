@@ -1,84 +1,79 @@
+// src/components/SectionCard.tsx
 import React from "react";
-
-export interface SectionDto {
-  section_id: number;
-  section_number?: number;
-  course_id?: number;
-  course_code?: string;
-  course_name?: string;
-  capacity?: number;
-  enrolled?: number;
-  schedule_str?: string; // e.g. "Mon 09:00-10:00|Wed 09:00-10:00" or comma separated
-  teacher_name?: string;
-  room_name?: string;
-  seats_left?: number;
-  time_conflict?: boolean;
-  prereq_ok?: boolean;
-  can_enroll?: boolean;
-}
+import { Section } from "../types/models";
 
 interface Props {
-  section: SectionDto;
-  onAdd?: (s: SectionDto) => void;
-  onRemove?: (id: number) => void;
+  section: Section;
+  onAdd?: (s: Section) => void;
+  onPreviewToggle?: (sectionId: number) => void;
+  isPreviewed?: boolean;
   disabled?: boolean;
 }
 
-const SectionCard: React.FC<Props> = ({ section, onAdd, onRemove, disabled }) => {
+const badgeStyle: React.CSSProperties = {
+  display: "inline-block",
+  padding: "2px 6px",
+  borderRadius: 6,
+  fontSize: 12,
+  marginRight: 6
+};
+
+const SectionCard: React.FC<Props> = ({ section, onAdd, onPreviewToggle, isPreviewed, disabled }) => {
   const {
-    course_code,
-    course_name,
-    teacher_name,
-    room_name,
-    schedule_str,
-    enrolled,
+    courseCode,
+    courseName,
+    teacherName,
+    roomName,
+    schedule,
+    sectionNumber,
     capacity,
-    seats_left,
-    time_conflict,
-    prereq_ok,
-    can_enroll,
+    seatsLeft,
+    timeConflict,
+    prereqsMet,
+    canEnroll,
+    sectionId
   } = section;
 
+  const bg = timeConflict ? "#fff5f5" : (prereqsMet === false ? "#fff9f0" : isPreviewed ? "#f0f9ff" : "#ffffff");
+
   return (
-    <div className={`border rounded p-3 mb-3 shadow-sm ${time_conflict ? "bg-red-50" : "bg-white"}`}>
-      <div className="flex justify-between">
+    <div style={{ border: "1px solid #e2e8f0", borderRadius: 8, padding: 12, marginBottom: 12, background: bg, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <div className="font-semibold text-md">{course_code} — {course_name}</div>
-          <div className="text-sm text-gray-600">{teacher_name || "TBD"} • {room_name || "TBD"}</div>
+          <div style={{ fontWeight: 700 }}>{courseCode ?? "—"} — {courseName ?? "—"}</div>
+          <div style={{ color: "#555", fontSize: 13 }}>{teacherName ?? "TBD"} • {roomName ?? "TBD"}</div>
+          <div style={{ color: "#666", marginTop: 6, fontSize: 13 }}>{schedule ?? "TBA"}</div>
         </div>
-        <div className="text-right">
-          <div className="text-sm">{enrolled ?? 0}/{capacity ?? 10}</div>
-          <div className="text-xs text-gray-500">{seats_left != null ? `${seats_left} seats left` : ""}</div>
+
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 13 }}>{(seatsLeft != null && capacity != null) ? `${seatsLeft}/${capacity}` : ""}</div>
+          <div style={{ marginTop: 8 }}>
+            {prereqsMet === false && <span style={{ ...badgeStyle, background: "#ffe9e9", color: "#b22222" }}>Missing prereq</span>}
+            {timeConflict && <span style={{ ...badgeStyle, background: "#ffeaea", color: "#b22222" }}>Time conflict</span>}
+            {isPreviewed && <span style={{ ...badgeStyle, background: "#e6f7ff", color: "#0b6fb0" }}>Preview</span>}
+          </div>
         </div>
       </div>
 
-      <div className="mt-2 text-sm">
-        <b>Schedule:</b> <span>{schedule_str || "TBD"}</span>
-      </div>
+      <div style={{ marginTop: 12, display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        {onPreviewToggle && (
+          <button
+            onClick={() => onPreviewToggle(sectionId)}
+            style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1", background: isPreviewed ? "#0ea5e9" : "#fff", color: isPreviewed ? "#fff" : "#111" }}
+          >
+            {isPreviewed ? "Unpreview" : "Preview"}
+          </button>
+        )}
 
-      <div className="mt-2 flex gap-2 items-center">
-        {prereq_ok === false && <span className="text-red-600 text-sm">Missing prerequisite</span>}
-        {time_conflict && <span className="text-red-600 text-sm">Time conflict</span>}
-        <div className="ml-auto">
-          {onAdd && (
-            <button
-              disabled={disabled || !can_enroll}
-              onClick={() => onAdd(section)}
-              className={`px-3 py-1 rounded text-sm ${(!can_enroll || disabled) ? "bg-gray-300 text-gray-700" : "bg-blue-600 text-white"}`}
-            >
-              {can_enroll ? "Add" : "Cannot add"}
-            </button>
-          )}
-
-          {onRemove && (
-        <button
-          onClick={() => onRemove(section.section_id)}
-          style={{ marginLeft: "10px", background: "lightcoral" }}
-        >
-          Remove
-        </button>
-      )}
-        </div>
+        {onAdd && (
+          <button
+            onClick={() => onAdd(section)}
+            disabled={!canEnroll || prereqsMet === false || timeConflict || disabled}
+            style={{ padding: "6px 12px", borderRadius: 6, border: "none", background: (!canEnroll || prereqsMet === false || timeConflict || disabled) ? "#cbd5e1" : "#0369a1", color: "#fff" }}
+          >
+            {canEnroll ? "Add" : "Cannot add"}
+          </button>
+        )}
       </div>
     </div>
   );
